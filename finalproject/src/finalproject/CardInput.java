@@ -15,8 +15,22 @@ public class CardInput {
             System.out.print("Enter card name: ");
             String name = scanner.nextLine();
 
-            System.out.print("Enter collector number: ");
-            int collectorNumber = Integer.parseInt(scanner.nextLine());
+            int collectorNumber = 0;
+            //event handling to ensure proper input format is followed
+            while (true) {
+                try {
+                    System.out.print("Enter collector number: ");
+                    collectorNumber = Integer.parseInt(scanner.nextLine());
+                    
+                    if (collectorNumber < 0) {
+                        System.out.println("Collector number can't be negative.");
+                        continue;
+                    }
+                    break;
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid number. Please enter a whole number.");
+                }
+            }
 
             PokemonCard card = new PokemonCard(name, collectorNumber);
 
@@ -28,7 +42,23 @@ public class CardInput {
             String rarity = scanner.nextLine();
 
             System.out.print("Enter price: ");
-            double price = Double.parseDouble(scanner.nextLine());
+            double price = 0;
+            // event handling to ensure proper input format is followed
+            while (true) {
+                try {
+                    System.out.print("Enter price: ");
+                    price = Double.parseDouble(scanner.nextLine());
+
+                    if (price < 0) {
+                        System.out.println("Price can't be negative.");
+                        continue; 
+                    }
+
+                    break; 
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid price format. Please enter a number.");
+                }
+            }
 
             CardStats stats = new CardStats(setName, rarity, price, collectorNumber);
             card.addOrUpdateStats(stats);
