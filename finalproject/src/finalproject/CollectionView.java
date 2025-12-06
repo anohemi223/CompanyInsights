@@ -1,6 +1,7 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.net.URL;
 /**
  * GUI for displaying and managing a Pokémon card collection.
  */
@@ -23,6 +24,8 @@ public class CollectionView extends JFrame {
     public CollectionView(Trainer trainer) {
         super("Pokémon Collection");
         this.trainer = trainer;
+        URL test = getClass().getResource("/images/pokeball-png-45354.png");
+        System.out.println("TEST RESOURCE = " + test);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
@@ -31,15 +34,17 @@ public class CollectionView extends JFrame {
         // Top Panel
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        topPanel.setBackground(Color.WHITE);
+        topPanel.setBackground(new Color(59, 76, 202));
 
         // Left Panel: Trainer Info
         JPanel trainerPanel = new JPanel();
         trainerPanel.setLayout(new BoxLayout(trainerPanel, BoxLayout.Y_AXIS));
-        trainerPanel.setBackground(Color.WHITE);
-
+        trainerPanel.setBackground(new Color(59, 76, 202));
+       
         trainerNameLabel = new JLabel("Trainer: " + trainer.getName());
+        trainerNameLabel.setForeground(Color.WHITE);
         trainerFavPokemonLabel = new JLabel("Favorite Pokémon: " + trainer.getFavPokemon());
+        trainerFavPokemonLabel.setForeground(Color.WHITE);
 
         trainerPanel.add(trainerNameLabel);
         trainerPanel.add(trainerFavPokemonLabel);
@@ -49,15 +54,17 @@ public class CollectionView extends JFrame {
         // Center title
         JLabel titleLabel = new JLabel("Pokémon Collection", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 26));
+        titleLabel.setForeground(new Color(255, 222, 0));
         topPanel.add(titleLabel, BorderLayout.CENTER);
 
         // Right Add Card button
         addCardButton = new JButton("Add Card");
+        addCardButton.setBackground(Color.WHITE);
         JPanel addButtonPanel = new JPanel();
-        addButtonPanel.setBackground(Color.WHITE);
+        
+      
         addButtonPanel.add(addCardButton);
         topPanel.add(addButtonPanel, BorderLayout.EAST);
-
         add(topPanel, BorderLayout.NORTH);
 
         // Center Table
@@ -65,12 +72,17 @@ public class CollectionView extends JFrame {
         tableModel = new DefaultTableModel(columnNames, 0);
         cardTable = new JTable(tableModel);
 
+        // Make header tabs red
+        cardTable.getTableHeader().setBackground(Color.RED);       
+        cardTable.getTableHeader().setForeground(Color.WHITE);     
+        cardTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 16)); 
+
         JScrollPane scrollPane = new JScrollPane(cardTable);
         add(scrollPane, BorderLayout.CENTER);
 
         // Bottom Panel: Save Collection button
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        bottomPanel.setBackground(Color.WHITE);
+        bottomPanel.setBackground(new Color(59, 76, 202));
         saveButton = new JButton("Save Collection");
         bottomPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         bottomPanel.add(saveButton);
@@ -133,7 +145,7 @@ public class CollectionView extends JFrame {
                     JOptionPane.showMessageDialog(this, "Invalid number. Please enter a whole number.");
                 }
             }
-
+// TODO : create a custom exception class to handle empty input so program does not close. Include yes/no option
             // Set name TODO(Name needs exception handling to not allow #'s)
             String setName = JOptionPane.showInputDialog(this, "Enter Set name:");
             if (setName == null) return;
@@ -196,6 +208,10 @@ public class CollectionView extends JFrame {
         return saveButton;
     }
 
+    public DefaultTableModel getTableModel() {
+        return tableModel;
+    }
+}
     public DefaultTableModel getTableModel() {
         return tableModel;
     }
