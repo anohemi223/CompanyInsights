@@ -1,21 +1,21 @@
 import java.util.Scanner;
 
 /**
- * Represents a Pokémon Trainer with a name, email, and collection of cards.
+ * Represents a Pokémon Trainer with a name, favorite Pokemon , and collection of cards.
  */
 public class Trainer {
     private String name;
-    private String email;
     private CollectionManager collection;
+	private String favPokemon;
 
     /**
-     *Trainer w/ name and email
+     *Trainer w/ name and favorite pokemon
      * @param name  the trainer's name
-     * @param email the trainer's email
+     * @param favPokemon the trainer's favorite Pokemon
      */
-    public Trainer(String name, String email) {
+    public Trainer(String name, String favPokemon) {
         this.name = name;
-        this.email = email;
+        this.favPokemon = favPokemon;
         this.collection = new CollectionManager();
     }
 
@@ -29,8 +29,8 @@ public class Trainer {
     /**
      * @return the trainer's email
      */
-    public String getEmail() {
-        return email;
+    public String getFavPokemon() {
+        return favPokemon;
     }
 
     /**
@@ -53,11 +53,9 @@ public class Trainer {
      * Displays the trainer's information and all cards in their collection.
      */
     public void displayTrainerInfo() {
-        System.out.println("Trainer: " + name + " | Email: " + email);
+        System.out.println("Trainer: " + name + " | Favorite Pokemon" + favPokemon);
         System.out.println("Collection:");
         collection.displayCollection();
     }
-}
-
 }
 
