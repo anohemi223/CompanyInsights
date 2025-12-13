@@ -1,7 +1,7 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.net.URL;
+
 /**
  * GUI for displaying and managing a Pokémon card collection.
  */
@@ -19,28 +19,44 @@ public class CollectionView extends JFrame {
 
     /**
      * Constructor: sets up GUI with trainer info and card collection.
+     *
      * @param trainer Trainer object containing name, favorite Pokémon, and collection
      */
     public CollectionView(Trainer trainer) {
         super("Pokémon Collection");
         this.trainer = trainer;
-        URL test = getClass().getResource("/images/pokeball-png-45354.png");
-        System.out.println("TEST RESOURCE = " + test);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
 
-        // Top Panel
+        setupTopPanel();
+        setupTable();
+        setupBottomPanel();
+
+        // Display window
+        pack();
+        setSize(900, 500);
+        setLocationRelativeTo(null);
+        setVisible(true);
+
+        // Add card button listener
+        addCardButton.addActionListener(e -> addCardDialog());
+    }
+
+    /**
+     * Sets up the top panel with trainer info and title.
+     */
+    private void setupTopPanel() {
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         topPanel.setBackground(new Color(59, 76, 202));
 
-        // Left Panel: Trainer Info
+        // Trainer info
         JPanel trainerPanel = new JPanel();
         trainerPanel.setLayout(new BoxLayout(trainerPanel, BoxLayout.Y_AXIS));
         trainerPanel.setBackground(new Color(59, 76, 202));
-       
+
         trainerNameLabel = new JLabel("Trainer: " + trainer.getName());
         trainerNameLabel.setForeground(Color.WHITE);
         trainerFavPokemonLabel = new JLabel("Favorite Pokémon: " + trainer.getFavPokemon());
@@ -57,37 +73,54 @@ public class CollectionView extends JFrame {
         titleLabel.setForeground(new Color(255, 222, 0));
         topPanel.add(titleLabel, BorderLayout.CENTER);
 
-        // Right Add Card button
+        // Add Card button
         addCardButton = new JButton("Add Card");
         addCardButton.setBackground(Color.WHITE);
         JPanel addButtonPanel = new JPanel();
-        
-      
         addButtonPanel.add(addCardButton);
         topPanel.add(addButtonPanel, BorderLayout.EAST);
+
         add(topPanel, BorderLayout.NORTH);
+    }
 
-        // Center Table
-        String[] columnNames = {"Name", "Collector #", "Set", "Rarity", "Price"};
-        tableModel = new DefaultTableModel(columnNames, 0);
+    /**
+     * Sets up the center table with all necessary categories
+     * 
+     */
+    private void setupTable() {
+        String[] columnNames = {"Category", "Name", "Collector #", "Set", "Rarity", "Price", "Display Type"};
+
+        tableModel = new DefaultTableModel(columnNames, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                // Only Set, Rarity, Price editable if card is Playable
+                String category = (String) getValueAt(row, 2);
+                return category != null && category.equals("Playable") && (column == 3 || column == 4 || column == 5);
+            }
+        };
+
         cardTable = new JTable(tableModel);
-
-        // Make header tabs red
-        cardTable.getTableHeader().setBackground(Color.RED);       
-        cardTable.getTableHeader().setForeground(Color.WHITE);     
-        cardTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 16)); 
+        cardTable.getTableHeader().setBackground(Color.RED);
+        cardTable.getTableHeader().setForeground(Color.WHITE);
+        cardTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 16));
 
         JScrollPane scrollPane = new JScrollPane(cardTable);
         add(scrollPane, BorderLayout.CENTER);
+    }
 
-        // Bottom Panel: Save Collection button
+    /**
+     * Sets up bottom panel with Save button.
+     */
+    private void setupBottomPanel() {
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         bottomPanel.setBackground(new Color(59, 76, 202));
-        saveButton = new JButton("Save Collection");
         bottomPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        saveButton = new JButton("Save Collection");
         bottomPanel.add(saveButton);
         add(bottomPanel, BorderLayout.SOUTH);
-     // Add action listener for saving
+
+        // Save
         saveButton.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setDialogTitle("Save Collection");
@@ -99,11 +132,8 @@ public class CollectionView extends JFrame {
                 try (java.io.PrintWriter writer = new java.io.PrintWriter(fileToSave)) {
                     for (PokemonCard card : trainer.getCollection().getCollection()) {
                         for (CardStats stats : card.getStats()) {
-                            writer.println(card.getName() + "," +
-                                           card.getCollectorNumber() + "," +
-                                           stats.getSetName() + "," +
-                                           stats.getRarity() + "," +
-                                           stats.getPrice());
+                            writer.println(card.getName() + "," + card.getCollectorNumber() + "," +
+                                    stats.getSetName() + "," + stats.getRarity() + "," + stats.getPrice());
                         }
                     }
                     JOptionPane.showMessageDialog(this, "Collection saved!");
@@ -112,93 +142,166 @@ public class CollectionView extends JFrame {
                 }
             }
         });
-        // Pack, size, and display
-        pack();
-        setSize(900, 500);
-        setLocationRelativeTo(null);
-        setVisible(true);
-
-        // Add card button listener
-        addCardButton.addActionListener(e -> addCardDialog());
     }
 
     /**
      * Opens dialogs to input card info and adds it to the collection and table.
+     * Each field is independently checked for exceptions and repromts as necessary.
      */
     private void addCardDialog() {
         try {
-            // Card name
-            String name = JOptionPane.showInputDialog(this, "Enter Pokémon name:");
-            if (name == null || name.isBlank()) return;
-
-            // Collector number with validation
-            int collectorNumber = -1;
-            while (collectorNumber < 0) {
-                String collectorStr = JOptionPane.showInputDialog(this, "Enter Collector # (whole number >= 0):");
-                if (collectorStr == null) return;
+        	
+        	 // Get Pokémon name
+            String name = null;
+            while (name == null) {
                 try {
-                    collectorNumber = Integer.parseInt(collectorStr);
-                    if (collectorNumber < 0) {
-                        JOptionPane.showMessageDialog(this, "Collector number can't be negative.");
-                    }
-                } catch (NumberFormatException ex) {
-                    JOptionPane.showMessageDialog(this, "Invalid number. Please enter a whole number.");
-                }
-            }
-// TODO : create a custom exception class to handle empty input so program does not close. Include yes/no option
-            // Set name TODO(Name needs exception handling to not allow #'s)
-            String setName = JOptionPane.showInputDialog(this, "Enter Set name:");
-            if (setName == null) return;
-
-            // Rarity TODO (rarity needs exception handling to not allow #'s)
-            String rarity = JOptionPane.showInputDialog(this, "Enter Rarity:");
-            if (rarity == null) return;
-
-            // Price with validation
-            double price = -1;
-            while (price < 0) {
-                String priceStr = JOptionPane.showInputDialog(this, "Enter Price (>= 0):");
-                if (priceStr == null) return;
-                try {
-                    price = Double.parseDouble(priceStr);
-                    if (price < 0) {
-                        JOptionPane.showMessageDialog(this, "Price can't be negative.");
-                    }
-                } catch (NumberFormatException ex) {
-                    JOptionPane.showMessageDialog(this, "Invalid price format. Please enter a number.");
+                    name = getLettersOnlyInput("Enter Card name:");
+                    if (name == null) return; // Cancel exits
+                } catch (InvalidInputException ex) {
+                    JOptionPane.showMessageDialog(this, ex.getMessage());
+                    // reprompt same field
                 }
             }
 
-            // Create card and stats
-            PokemonCard card = new PokemonCard(name, collectorNumber);
-            card.addOrUpdateStats(new CardStats(setName, rarity, price, collectorNumber));
+            // Get collector number
+            String collectorNumber = null;
+            while (collectorNumber == null) {
+                collectorNumber = JOptionPane.showInputDialog(this, "Enter Collector #:");
+                if (collectorNumber == null) return; // user pressed cancel
+                if (collectorNumber.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Field cannot be empty.");
+                    collectorNumber = null; // reprompt
+                }
+            }
+        	// Select category
+            String[] categories = { "Playable", "Display" };
+            int catChoice = JOptionPane.showOptionDialog(this, "Select Category:", "Card Category",
+                    JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, categories, categories[0]);
+            if (catChoice == JOptionPane.CLOSED_OPTION) return; // Cancel exits
+            String category = categories[catChoice];
 
-            // Add to trainer's collection
-            trainer.addCardToCollection(card);
+            if (category.equals("Display")) {
+                // Display card
+                String displayType = null;
+                while (displayType == null) {
+                	try {
+                        displayType = getLettersOnlyInput("Enter Card Display Type:");
+                        if (displayType == null) return; // Cancel exits
+                    } catch (InvalidInputException ex) {
+                        JOptionPane.showMessageDialog(this, ex.getMessage());
+                        // reprompt same field
+                    }
+                }
 
-            // Add to table
-            addCardToTable(card);
+                PokemonDisplayOnlyCard displayCard = new PokemonDisplayOnlyCard(name, collectorNumber, displayType);
+                trainer.addCardToCollection(displayCard);
+                addCardToTable(displayCard);
+
+            } else {
+                // Playable card
+                String setName = null;
+                while (setName == null) {
+                	try {
+                        setName = getLettersOnlyInput("Enter Set name:");
+                        if (setName == null) return;
+                    } catch (InvalidInputException ex) {
+                        JOptionPane.showMessageDialog(this, ex.getMessage());
+                    }
+                }
+
+            
+
+                String rarity = null;
+                while (rarity == null) {
+                	try {
+                        rarity = getLettersOnlyInput("Enter Rarity:");
+                        if (rarity == null) return;
+                    } catch (InvalidInputException ex) {
+                        JOptionPane.showMessageDialog(this, ex.getMessage());
+                    }
+                }
+
+                Double price = null;
+                while (price == null) {
+                	try {
+                        price = getNonNegativeDouble("Enter Price:");
+                        if (price == null) return;
+                    } catch (InvalidInputException ex) {
+                        JOptionPane.showMessageDialog(this, ex.getMessage());
+                    }
+                }
+
+                PokemonCard card = new PokemonCard(name, collectorNumber, category);
+                card.addOrUpdateStats(new CardStats(setName, rarity, price, collectorNumber));
+                trainer.addCardToCollection(card);
+                addCardToTable(card);
+            }
 
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error adding card: " + ex.getMessage());
+            JOptionPane.showMessageDialog(this, "Unexpected error: " + ex.getMessage());
         }
     }
 
     /**
-     * Adds a card to the visible JTable.
+     * Adds a card to the Table.
+     *
      * @param card PokemonCard to add
      */
     public void addCardToTable(PokemonCard card) {
-        for (CardStats stats : card.getStats()) {
-            tableModel.addRow(new Object[]{
-                    card.getName(),
-                    stats.getCollectorNumber(),
-                    stats.getSetName(),
-                    stats.getRarity(),
-                    stats.getPrice()
+        if (card instanceof PokemonDisplayOnlyCard displayCard) {
+            tableModel.addRow(new Object[] {
+                card.getCategory(),                 // Category
+                card.getName(),                     // Name
+                card.getCollectorNumber(),          // Collector #
+                "",                                 // No Set
+                "",                                 // No Rarity
+                "",                                 // No Price
+                displayCard.getDisplayType()        // Display Type
             });
+        } else {
+            for (CardStats stats : card.getStats()) {
+                tableModel.addRow(new Object[] {
+                    card.getCategory(),             // Category
+                    card.getName(),                 // Name
+                    card.getCollectorNumber(),      // Collector #
+                    stats.getSetName(),             // Set
+                    stats.getRarity(),              // Rarity
+                    stats.getPrice(),               // Price
+                    ""                              // Display Type
+                });
+            }
         }
     }
+    // Prompts user for input containing only letters
+    private String getLettersOnlyInput(String prompt) throws InvalidInputException {
+        while (true) {
+            String input = JOptionPane.showInputDialog(this, prompt);
+            if (input == null) return null; // Cancel pressed
+            input = input.trim();
+            if (input.isEmpty()) throw new InvalidInputException("Field cannot be empty.");
+            if (!input.matches("[a-zA-Z ]+")) throw new InvalidInputException("Enter only letters.");
+            return input;
+        }
+    }
+
+    // Prompts user for a non-negative double. 
+    private Double getNonNegativeDouble(String prompt) throws InvalidInputException {
+        while (true) {
+            String input = JOptionPane.showInputDialog(this, prompt);
+            if (input == null) return null; // Cancel pressed
+            input = input.trim();
+            if (input.isEmpty()) throw new InvalidInputException("Field cannot be empty.");
+            try {
+                double value = Double.parseDouble(input);
+                if (value < 0) throw new InvalidInputException("Value cannot be negative.");
+                return value;
+            } catch (NumberFormatException e) {
+                throw new InvalidInputException("Must be a valid number.");
+            }
+        }
+    }
+
+    // Getters
 
     public JButton getAddButton() {
         return addCardButton;
@@ -208,10 +311,6 @@ public class CollectionView extends JFrame {
         return saveButton;
     }
 
-    public DefaultTableModel getTableModel() {
-        return tableModel;
-    }
-}
     public DefaultTableModel getTableModel() {
         return tableModel;
     }
