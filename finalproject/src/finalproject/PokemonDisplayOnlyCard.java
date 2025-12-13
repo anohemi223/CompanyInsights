@@ -1,34 +1,13 @@
-public class PokemonDisplayOnlyCard extends TradingCard {
-    private String displayType; // e.g., "Oversize", "Jumbo", "Art Card"
+public class PokemonDisplayOnlyCard extends PokemonCard {
+    private String displayType;
 
-    /**
-     * Constructs a DisplayCard with a name, collector number, and display type.
-     */
-    public PokemonDisplayOnlyCard(String name, int collectorNumber, String type) {
-        super(name, collectorNumber);
+    public PokemonDisplayOnlyCard(String name, String collectorNumber, String type) throws InvalidInputException {
+        super(name, collectorNumber, "Display");
         this.displayType = type;
     }
 
-    /**
-     * Returns card category
-     */
-    @Override
-    public String getCategory() {
-        return "Display / Oversize";
-    }
-
-    /**
-     * Returns the display type of card
-     */
     public String getDisplayType() {
         return displayType;
-    }
-
-    /**
-     * Sets the display type of card
-     */
-    public void setDisplayType(String displayType) {
-        this.displayType = displayType;
     }
 
     @Override
