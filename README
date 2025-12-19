@@ -1,1 +1,3 @@
-
+Pokémon Collection is a Java program that allows users to create and manage a personal Pokémon collection. The application provides a graphical interface where users can add Pokémon and view their details in an organized collection.
+The program was created for a Java Project and employs OOD.
+Overall, the project contains Pokemon Trading Card objects with a list of attributes like name, price, or set, to name a few. It is managed by a user, the trainer , and can save to CSV.
