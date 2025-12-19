@@ -1,96 +1,97 @@
-
-
-/**
- * 
- */
-
-import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Lead Author(s):
+ * 
+ * @author Nohemi Arquette
+ * 
+ *         Responsibilities: Manages a collection of Pokémon cards for a
+ *         trainer. Provides functionality to add cards, retrieve the
+ *         collection, and display it.
+ */
+
+//CollectionManager HAS-A List<PokemonCard>
 public class CollectionManager {
 
 	private List<PokemonCard> collection;
+	private String trainerName;
+	private String trainerFavPokemon;
 
-import javax.swing.*;
-import java.util.ArrayList;
-import java.util.List;
+	/**
+	 * Default constructor initializes an empty collection.
+	 */
+	public CollectionManager() {
+		this.collection = new ArrayList<>();
+	}
 
-/**
- * Manages a collection of Pokémon cards for a trainer.
- * Provides functionality to add cards, retrieve the collection, and display it.
- */
-public class CollectionManager {
+	/**
+	 * Constructor initializes a collection for a trainer with a given name.
+	 * 
+	 * @param trainerName Name of the trainer
+	 */
+	public CollectionManager(String trainerName) {
+		this.trainerName = trainerName;
+		this.collection = new ArrayList<>();
+	}
 
-    private List<PokemonCard> collection;
-    private String trainerName;
-    private String trainerFavPokemon;
+	/**
+	 * Returns the list of Pokémon cards in the collection.
+	 * 
+	 * @return List of PokemonCard objects
+	 */
+	public List<PokemonCard> getCollection() {
+		return collection;
+	}
 
-    /**
-     * Default constructor initializes an empty collection.
-     */
-    public CollectionManager() {
-        this.collection = new ArrayList<>();
-    }
+	/**
+	 * Adds a Pokémon card to the collection. If a card with the same name already
+	 * exists, its stats are updated instead.
+	 * 
+	 * @param card The PokemonCard to add or update
+	 */
+	public void addCard(PokemonCard card) {
+		for (int i = 0; i < collection.size(); i++) {
+			PokemonCard existingCard = collection.get(i);
 
-    /**
-     * Constructor initializes a collection for a trainer with a given name.
-     * 
-     * @param trainerName Name of the trainer
-     */
-    public CollectionManager(String trainerName) {
-        this.trainerName = trainerName;
-        this.collection = new ArrayList<>();
-    }
+			// Compare both name and collector number
+			if (existingCard.getName().equalsIgnoreCase(card.getName())) {
+				// Check card stats for matching collectorNumber
+				for (CardStats newStats : card.getStats()) {
+					existingCard.addOrUpdateStats(newStats);
+				}
+				return;
+			}
+		}
 
-    /**
-     * Returns the list of Pokémon cards in the collection.
-     * 
-     * @return List of PokemonCard objects
-     */
-    public List<PokemonCard> getCollection() {
-        return collection;
-    }
+		// If no matching card name/collector number combo found, add new card
+		collection.add(card);
+	}
 
-    /**
-     * Adds a Pokémon card to the collection.
-     * If a card with the same name already exists, its stats are updated instead.
-     * 
-     * @param card The PokemonCard to add or update
-     */
-    public void addCard(PokemonCard card) {
-        for (int i = 0; i < collection.size(); i++) {
-            PokemonCard existingCard = collection.get(i);
+	/**
+	 * Prints the Pokémon collection
+	 */
+	public void displayCollection() {
+		for (PokemonCard card : collection) {
+			System.out.println(card);
+		}
+	}
 
-            // Compare both name and collector number
-            if (existingCard.getName().equalsIgnoreCase(card.getName())) {
-                // Check card stats for matching collectorNumber
-                for (CardStats newStats : card.getStats()) {
-                    existingCard.addOrUpdateStats(newStats);
-                }
-                return;
-            }
-        }
+	/**
+	 * Returns the trainer's name.
+	 * 
+	 * @return trainerName
+	 */
+	public String getTrainerName() {
+		return trainerName;
+	}
 
-        // If no matching card name/collector number combo found, add new card
-        collection.add(card);
-    }
-
-    /**
-     * Prints the Pokémon collection
-     */
-    public void displayCollection() {
-        for (PokemonCard card : collection) {
-            System.out.println(card);
-        }
-    }
-
-    /**
-     * Returns the trainer's name.
-     * 
-     * @return trainerName
-     */
-    public String getTrainerName() {
-        return trainerName; 
-    }
+	/**
+	 * Returns the trainer's favorite Pokemon.
+	 * 
+	 * @return trainerFavPokemon
+	 */
+	public String getTrainerFavPokemon() {
+		return trainerFavPokemon;
+	}
 }
